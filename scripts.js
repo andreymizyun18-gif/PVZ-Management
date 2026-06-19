@@ -1,21 +1,17 @@
 const KEYS = ["employees", "materials", "equipment", "shifts"];
-
 function getData(key) {
   return JSON.parse(localStorage.getItem(key) || "[]");
 }
 function setData(key, val) {
   localStorage.setItem(key, JSON.stringify(val));
 }
-
 function resetData() {
   if (!confirm("Все данные будут удалены. Продолжить?")) return;
   KEYS.forEach((k) => localStorage.removeItem(k));
   renderAll();
 }
-
 let currentForm = null;
 let editId = null;
-
 function showPage(page) {
   document.querySelectorAll(".page").forEach((p) => p.classList.add("hidden"));
   document.getElementById("page-" + page).classList.remove("hidden");
@@ -29,7 +25,6 @@ function showPage(page) {
   if (page === "shifts") renderShifts();
   if (page === "employees") renderEmployees();
 }
-
 function renderAll() {
   renderDashboard();
   renderMaterials();
@@ -37,22 +32,18 @@ function renderAll() {
   renderShifts();
   renderEmployees();
 }
-
 function renderDashboard() {
   const mats = getData("materials");
   const eq = getData("equipment");
   const shifts = getData("shifts");
   const today = new Date().toISOString().split("T")[0];
-
   document.getElementById("dash-materials").textContent = mats.length;
   document.getElementById("dash-equipment").textContent = eq.length;
   document.getElementById("dash-shifts").textContent = shifts.filter(
     (s) => s.date === today,
   ).length;
-
   const critical = mats.filter((m) => m.quantity <= m.min_stock);
   document.getElementById("dash-critical").textContent = critical.length;
-
   const alertBox = document.getElementById("dash-alerts");
   const alertList = document.getElementById("alert-list");
   if (critical.length > 0) {
@@ -66,7 +57,6 @@ function renderDashboard() {
   } else {
     alertBox.style.display = "none";
   }
-
   const statuses = {};
   eq.forEach((e) => {
     statuses[e.status] = (statuses[e.status] || 0) + 1;
@@ -79,7 +69,6 @@ function renderDashboard() {
       )
       .join("") ||
     '<tr><td colspan="2" style="color:var(--gray-400);text-align:center;padding:40px"><div class="empty-state" style="padding:0"><div class="empty-state-icon" style="width:56px;height:56px;margin-bottom:12px"><svg style="width:28px;height:28px"><use href="#icon-cpu"/></svg></div><div class="empty-state-title" style="font-size:15px">Нет данных</div></div></td></tr>';
-
   document.getElementById("today-date").textContent =
     new Date().toLocaleDateString("ru-RU", {
       weekday: "long",
@@ -87,20 +76,17 @@ function renderDashboard() {
       month: "long",
     });
 }
-
 function renderMaterials() {
   const search = document.getElementById("mat-search").value.toLowerCase();
   const filter = document.getElementById("mat-filter").value;
   let mats = getData("materials");
   if (search) mats = mats.filter((m) => m.name.toLowerCase().includes(search));
   if (filter) mats = mats.filter((m) => m.category === filter);
-
   const container = document.getElementById("materials-content");
   if (mats.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg><use href="#icon-box"/></svg></div><div class="empty-state-title">Нет расходных материалов</div><div class="empty-state-desc">Нажмите «Добавить», чтобы создать первую запись</div></div>`;
     return;
   }
-
   container.innerHTML = `<div class="table-wrap"><table>
         <thead><tr><th>Название</th><th>Категория</th><th>Количество</th><th>Мин. запас</th><th>Ед. изм.</th><th>Статус</th><th style="width:120px">Действия</th></tr></thead>
         <tbody>${mats
@@ -122,7 +108,6 @@ function renderMaterials() {
           .join("")}</tbody>
     </table></div>`;
 }
-
 function renderEquipment() {
   const filter = document.getElementById("eq-filter").value;
   let eq = getData("equipment");
@@ -132,13 +117,11 @@ function renderEquipment() {
     const e = emps.find((x) => x.id === id);
     return e ? e.full_name : "Не назначен";
   };
-
   const container = document.getElementById("equipment-content");
   if (eq.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg><use href="#icon-printer"/></svg></div><div class="empty-state-title">Нет оборудования</div><div class="empty-state-desc">Нажмите «Добавить», чтобы создать первую запись</div></div>`;
     return;
   }
-
   container.innerHTML = `<div class="eq-grid">${eq
     .map((e) => {
       const statusClass =
@@ -172,7 +155,6 @@ function renderEquipment() {
         </div>`;
     })
     .join("")}</div>`;
-
   document.querySelectorAll(".eq-card").forEach((card) => {
     const accent = card.style.getPropertyValue("--card-accent");
     if (accent) {
@@ -182,7 +164,6 @@ function renderEquipment() {
     }
   });
 }
-
 function renderShifts() {
   const shifts = getData("shifts");
   const emps = getData("employees");
@@ -190,20 +171,17 @@ function renderShifts() {
     const e = emps.find((x) => x.id === id);
     return e ? e.full_name : "Неизвестно";
   };
-
   const container = document.getElementById("shifts-content");
   if (shifts.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg><use href="#icon-calendar"/></svg></div><div class="empty-state-title">Нет запланированных смен</div><div class="empty-state-desc">Нажмите «Добавить смену», чтобы создать первую запись</div></div>`;
     return;
   }
-
   const byDate = {};
   shifts.forEach((s) => {
     if (!byDate[s.date]) byDate[s.date] = [];
     byDate[s.date].push(s);
   });
   const sortedDates = Object.keys(byDate).sort();
-
   container.innerHTML = `<div class="shift-grid">${sortedDates
     .map((date) => {
       const d = new Date(date);
@@ -241,7 +219,6 @@ function renderShifts() {
     })
     .join("")}</div>`;
 }
-
 function renderEmployees() {
   const emps = getData("employees");
   const container = document.getElementById("employees-content");
@@ -249,7 +226,6 @@ function renderEmployees() {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg><use href="#icon-users"/></svg></div><div class="empty-state-title">Нет сотрудников</div><div class="empty-state-desc">Нажмите «Добавить», чтобы создать первую запись</div></div>`;
     return;
   }
-
   container.innerHTML = `<div class="table-wrap"><table>
         <thead><tr><th>ФИО</th><th>Должность</th><th>Телефон</th><th style="width:120px">Действия</th></tr></thead>
         <tbody>${emps
@@ -269,7 +245,6 @@ function renderEmployees() {
           .join("")}</tbody>
     </table></div>`;
 }
-
 function openModal(type, id = null) {
   editId = id;
   currentForm = type;
@@ -277,7 +252,6 @@ function openModal(type, id = null) {
   const title = document.getElementById("modal-title");
   const body = document.getElementById("modal-body");
   modal.classList.add("active");
-
   let html = "";
   if (type === "material") {
     title.textContent = id ? "Редактировать расходник" : "Добавить расходник";
@@ -346,24 +320,20 @@ function openModal(type, id = null) {
   }
   body.innerHTML = html;
 }
-
 function closeModal() {
   document.getElementById("modal").classList.remove("active");
   currentForm = null;
   editId = null;
 }
-
 function getStorageKey(formType) {
   if (formType === "equipment") return "equipment";
   return formType + "s";
 }
-
 function saveForm() {
   if (!currentForm) return;
   const key = getStorageKey(currentForm);
   const items = getData(key);
   const data = { id: editId || Date.now() };
-
   if (currentForm === "material") {
     data.name = document.getElementById("f-name").value;
     data.category = document.getElementById("f-category").value;
@@ -393,7 +363,6 @@ function saveForm() {
     data.position = document.getElementById("f-pos").value;
     data.phone = document.getElementById("f-phone").value;
   }
-
   if (editId) {
     const idx = items.findIndex((x) => x.id === editId);
     if (idx >= 0) items[idx] = data;
@@ -404,7 +373,6 @@ function saveForm() {
   closeModal();
   renderAll();
 }
-
 function deleteMaterial(id) {
   if (confirm("Удалить расходник?")) {
     setData(
@@ -445,7 +413,6 @@ function deleteEmployee(id) {
     renderDashboard();
   }
 }
-
 function editMaterial(id) {
   openModal("material", id);
 }
@@ -458,5 +425,4 @@ function editShift(id) {
 function editEmployee(id) {
   openModal("employee", id);
 }
-
 renderAll();
